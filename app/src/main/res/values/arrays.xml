@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="spinner_time_options">
+        <item>&#8212; Select &#8212;</item>
+        <item>Not today</item>
+        <item>0.5 hrs</item>
+        <item>1 hrs</item>
+        <item>1.5 hrs</item>
+        <item>2 hrs</item>
+    </string-array>
+</resources>

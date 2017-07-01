@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Habit Tracker</string>
+    <string name="column_1">Jogging</string>
+    <string name="column_2">Swimming</string>
+    <string name="column_3">Granma</string>
+    <string name="column_4">French</string>
+    <string name="mon">Mon</string>
+    <string name="tue">Tue</string>
+    <string name="wen">Wed</string>
+    <string name="thu">Thu</string>
+    <string name="fri">Fri</string>
+    <string name="sat">Sat</string>
+    <string name="sun">Sun</string>
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+    <string name="sunday">Sunday</string>
+    <string name="recap_header">Recap for the current week:</string>
+    <string name="done_today">What did you do today?</string>
+    <string name="done_1">Went jogging: </string>
+    <string name="done_2">Went swimming: </string>
+    <string name="done_3">Spent time with granma: </string>
+    <string name="done_4">Studied French: </string>
+    <string name="button_next_day">Next day</string>
+    <string name="button_ok">Confirm</string>
+</resources>
