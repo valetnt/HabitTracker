@@ -17,7 +17,6 @@ import android.widget.Toast;
 import com.example.android.habittracker.data.HabitTrackerContract.HabitEntry;
 import com.example.android.habittracker.data.HabitTrackerDbHelper;
 
-
 public class MainActivity extends AppCompatActivity {
 
     HabitTrackerDbHelper mDbHelper;
@@ -151,34 +150,39 @@ public class MainActivity extends AppCompatActivity {
         Cursor cursor = db.query(HabitEntry.TABLE_NAME, columns, null, null, null, null, null);
         try {
             if(cursor.getCount() > 0) {
-                for (int i = 0; i < cursor.getCount(); i++) {
-                    mTable.setVisibility(View.VISIBLE);
-                    // Fill the table
-                    LinearLayout entries = (LinearLayout)
+                mTable.setVisibility(View.VISIBLE);
+                // Loop on all the entries
+                cursor.moveToFirst();
+                while(!cursor.isAfterLast()) {
+                    // Fill each row in the table
+                    LinearLayout new_entry = (LinearLayout)
                             LayoutInflater.from(this).inflate(R.layout.table_entries, mTable, false);
+                    mTable.addView(new_entry);
                     // Zeroth column
-                    ((TextView) entries.findViewById(R.id.weekday)).setText
+                    ((TextView) new_entry.findViewById(R.id.weekday)).setText
                             (abbreviateWeekday(mWeekday.getText().toString()));
                     // First column
                     int hours_jogging = cursor.getInt(cursor.getColumnIndex
                             (HabitEntry.COLUMN_JOGGING_TIME));
-                    ((TextView) entries.findViewById(R.id.column_jogging)).setText
+                    ((TextView) new_entry.findViewById(R.id.column_jogging)).setText
                             (getHours(hours_jogging));
                     // Second column
                     int hours_swimming = cursor.getInt(cursor.getColumnIndex
                             (HabitEntry.COLUMN_SWIMMING_TIME));
-                    ((TextView) entries.findViewById(R.id.column_swimming)).setText
+                    ((TextView) new_entry.findViewById(R.id.column_swimming)).setText
                             (getHours(hours_swimming));
                     // Third column
                     int hours_granma = cursor.getInt(cursor.getColumnIndex
                             (HabitEntry.COLUMN_GRANMA_TIME));
-                    ((TextView) entries.findViewById(R.id.column_granma)).setText
+                    ((TextView) new_entry.findViewById(R.id.column_granma)).setText
                             (getHours(hours_granma));
                     // Fourth column
                     int hours_french = cursor.getInt(cursor.getColumnIndex
                             (HabitEntry.COLUMN_FRENCH_TIME));
-                    ((TextView) entries.findViewById(R.id.column_french)).setText
+                    ((TextView) new_entry.findViewById(R.id.column_french)).setText
                             (getHours(hours_french));
+
+                    cursor.moveToNext();
                 }
             } else {
                 // Table remains empty, so hide it
