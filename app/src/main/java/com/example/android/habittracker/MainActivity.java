@@ -28,6 +28,8 @@ import com.example.android.habittracker.data.HabitTrackerDbHelper;
  */
 public class MainActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+
     HabitTrackerDbHelper mDbHelper;
 
     // Spinners for selecting the number of hours spent doing each activity:
@@ -86,6 +88,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Update weekday (and possibly week) every time this activity is recreated
         updateWeekDay();
+        Log.i(LOG_TAG, "Current week: " + mCurrentWeek);
+        Log.i(LOG_TAG, "Current weekday: " + mCurrentWeekday);
 
         mSummaryTable = (LinearLayout) findViewById(R.id.table);
         displaySummary();
@@ -103,6 +107,8 @@ public class MainActivity extends AppCompatActivity {
 
                 // Update weekday (and possibly week)
                 updateWeekDay();
+                Log.i(LOG_TAG, "Current week: " + mCurrentWeek);
+                Log.i(LOG_TAG, "Current weekday: " + mCurrentWeekday);
 
                 // Reactivate the "CONFIRM" button
                 mButtonOk.setEnabled(true);
