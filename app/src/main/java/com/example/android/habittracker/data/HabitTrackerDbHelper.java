@@ -15,6 +15,7 @@ public class HabitTrackerDbHelper extends SQLiteOpenHelper {
 
     private static final String SQL_CREATE_ENTRIES = "CREATE TABLE " + HabitEntry.TABLE_NAME + " ("
             + HabitEntry.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + HabitEntry.COLUMN_WEEK + " INTEGER NOT NULL, " // increments by 1 every new monday
             + HabitEntry.COLUMN_JOGGING_TIME + " INTEGER, "
             + HabitEntry.COLUMN_SWIMMING_TIME + " INTEGER, "
             + HabitEntry.COLUMN_GRANMA_TIME + " INTEGER, "

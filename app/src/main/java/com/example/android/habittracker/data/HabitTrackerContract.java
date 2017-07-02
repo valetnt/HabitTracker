@@ -11,6 +11,7 @@ public class HabitTrackerContract {
         public static final String TABLE_NAME = "habits";
         // Columns
         public static final String COLUMN_ID = BaseColumns._ID;
+        public static final String COLUMN_WEEK = "week";
         public static final String COLUMN_JOGGING_TIME = "jogging";
         public static final String COLUMN_SWIMMING_TIME = "swimming";
         public static final String COLUMN_GRANMA_TIME = "granma";
@@ -21,7 +22,5 @@ public class HabitTrackerContract {
         public static final int ONE_HOUR = 2;
         public static final int ONE_HOUR_AND_HALF = 3;
         public static final int TWO_HOURS = 4;
-        // Clear table
-        public static final String CLEAR_TABLE = "DELETE FROM " + TABLE_NAME + ";";
     }
 }
