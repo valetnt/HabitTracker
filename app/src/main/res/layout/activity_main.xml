@@ -16,7 +16,8 @@
         style="@style/Header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/friday" />
+        android:layout_marginBottom="@dimen/spacing"
+        android:text="@string/weekday" />
 
     <TextView
         android:id="@+id/text_header"
@@ -91,16 +92,15 @@
             android:layout_gravity="center_vertical"
             android:text="@string/done_3" />
 
-        <Spinner
-            android:id="@+id/spinner_granma"
-            android:layout_width="wrap_content"
+        <EditText
+            android:id="@+id/student"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
             android:layout_marginLeft="@dimen/activity_margin"
             android:layout_marginStart="@dimen/activity_margin"
-            android:spinnerMode="dropdown">
-
-        </Spinner>
+            android:layout_weight="1"
+            android:hint="@string/student"
+            android:inputType="textPersonName" />
 
     </LinearLayout>
 
@@ -141,9 +141,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/spacing"
-            android:layout_marginTop="@dimen/spacing"
-            android:layout_marginRight="@dimen/activity_margin"
             android:layout_marginEnd="@dimen/activity_margin"
+            android:layout_marginRight="@dimen/activity_margin"
+            android:layout_marginTop="@dimen/spacing"
             android:text="@string/button_ok" />
 
         <Button
@@ -151,9 +151,9 @@
             style="@style/ButtonNextDay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing"
             android:layout_marginLeft="@dimen/activity_margin"
             android:layout_marginRight="@dimen/activity_margin"
-            android:layout_marginBottom="@dimen/spacing"
             android:layout_marginTop="@dimen/spacing"
             android:text="@string/button_next_day" />
 
@@ -167,67 +167,75 @@
         android:layout_marginTop="@dimen/spacing"
         android:text="@string/recap_header" />
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/table"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                style="@style/Columns"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_weight="3" />
 
-                <TextView
-                    style="@style/Columns"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="3"/>
+            <TextView
+                style="@style/Columns"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/column_1" />
 
-                <TextView
-                    style="@style/Columns"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:text="@string/column_1"/>
+            <TextView
+                style="@style/Columns"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/column_2" />
 
-                <TextView
-                    style="@style/Columns"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:text="@string/column_2"/>
+            <TextView
+                style="@style/Columns"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/column_3" />
 
-                <TextView
-                    style="@style/Columns"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:text="@string/column_3"/>
-
-                <TextView
-                    style="@style/Columns"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:text="@string/column_4"/>
-
-            </LinearLayout>
+            <TextView
+                style="@style/Columns"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/column_4" />
 
         </LinearLayout>
 
-    </ScrollView>
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </LinearLayout>
 
 </LinearLayout>

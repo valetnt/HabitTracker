@@ -19,7 +19,7 @@ public class HabitTrackerDbHelper extends SQLiteOpenHelper {
             + HabitEntry.COLUMN_DAY + " INTEGER NOT NULL, " // goes from 1 (monday) to 7 (sunday)
             + HabitEntry.COLUMN_JOGGING_TIME + " INTEGER, "
             + HabitEntry.COLUMN_SWIMMING_TIME + " INTEGER, "
-            + HabitEntry.COLUMN_GRANMA_TIME + " INTEGER, "
+            + HabitEntry.COLUMN_TUTORING + " TEXT, "
             + HabitEntry.COLUMN_FRENCH_TIME + " INTEGER"
             + ");";
 

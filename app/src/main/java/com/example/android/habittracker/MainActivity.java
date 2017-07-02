@@ -5,11 +5,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -19,8 +19,8 @@ import com.example.android.habittracker.data.HabitTrackerDbHelper;
 
 /*
  * This activity allows the user to keep track daily of the number of hours he has spent
- * doing a certain activity, such as swimming, jogging, studying French,
- * or helping his poor old grandma buying grocery and doing the housework.
+ * doing a certain activity, such as swimming, jogging, or studying French,
+ * or keep track of his voluntary work tutoring young students with their homework.
  * NO CALENDARS have been used for the moment, for the sake of simplicity.
  * It is simply assumed that the app IS USED EVERY DAY AND ONLY ONCE PER DAY,
  * so that when you relaunch the app -- and so this activity is recreated --
@@ -29,15 +29,14 @@ import com.example.android.habittracker.data.HabitTrackerDbHelper;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private static final String LOG_TAG = MainActivity.class.getSimpleName();
-
     HabitTrackerDbHelper mDbHelper;
 
     // Spinners for selecting the number of hours spent doing each activity:
     Spinner mSpinnerJogging;
     Spinner mSpinnerSwimming;
-    Spinner mSpinnerGranma;
     Spinner mSpinnerFrench;
+
+    EditText mStudent;
 
     // There is a button to confirm that data has been entered correctly,
     // and that we want the database to update with this new piece of data.
@@ -73,9 +72,10 @@ public class MainActivity extends AppCompatActivity {
 
         mDbHelper = new HabitTrackerDbHelper(this);
 
+        mStudent = (EditText) findViewById(R.id.student);
+
         mSpinnerJogging = (Spinner) findViewById(R.id.spinner_jogging);
         mSpinnerSwimming = (Spinner) findViewById(R.id.spinner_swimming);
-        mSpinnerGranma = (Spinner) findViewById(R.id.spinner_granma);
         mSpinnerFrench = (Spinner) findViewById(R.id.spinner_french);
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -85,22 +85,15 @@ public class MainActivity extends AppCompatActivity {
         // Apply the same adapter to all the spinners
         mSpinnerJogging.setAdapter(adapter);
         mSpinnerSwimming.setAdapter(adapter);
-        mSpinnerGranma.setAdapter(adapter);
         mSpinnerFrench.setAdapter(adapter);
 
         mWeekday = (TextView) findViewById(R.id.weekday);
 
         // Update day (and possibly week) every time this activity is recreated
         updateWeekDay();
-        Log.i(LOG_TAG, "Current week: " + mCurrentWeek);
-        Log.i(LOG_TAG, "Current weekday: " + mCurrentWeekday);
 
-        mSummaryTable = (LinearLayout) findViewById(R.id.table);
+        mSummaryTable = (LinearLayout) findViewById(R.id.container);
         displaySummary();
-
-        // Disable the "NEXT DAY" button until the database is updated
-        // with the data of the current day
-        mButtonNextDay.setEnabled(false);
 
         mButtonNextDay = (Button) findViewById(R.id.button_next_day);
         mButtonNextDay.setOnClickListener(new View.OnClickListener() {
@@ -108,15 +101,23 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 // Reset the spinners
+                mSpinnerJogging.setEnabled(true);
+                mSpinnerSwimming.setEnabled(true);
+                mSpinnerFrench.setEnabled(true);
                 mSpinnerJogging.setSelection(0);
                 mSpinnerSwimming.setSelection(0);
-                mSpinnerGranma.setSelection(0);
                 mSpinnerFrench.setSelection(0);
+                // Reset edittext
+                mStudent.setEnabled(true);
+                mStudent.setText("");
+
+                // If a new week starts, clean the summary table
+                if (mCurrentWeekday == HabitEntry.SUN) {
+                    mSummaryTable.removeAllViews();
+                }
 
                 // Update day (and possibly week)
                 updateWeekDay();
-                Log.i(LOG_TAG, "Current week: " + mCurrentWeek);
-                Log.i(LOG_TAG, "Current weekday: " + mCurrentWeekday);
 
                 // Reactivate the "CONFIRM" button
                 mButtonOk.setEnabled(true);
@@ -127,6 +128,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Disable the "NEXT DAY" button until the database is updated
+        // with the data of the current day
+        mButtonNextDay.setEnabled(false);
+
         mButtonOk = (Button) findViewById(R.id.button_ok);
         mButtonOk.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -136,8 +141,10 @@ public class MainActivity extends AppCompatActivity {
                 // into an integer variable, reading from the spinner selected item
                 int todayJogging = getSelectedInteger(mSpinnerJogging.getSelectedItemPosition());
                 int todaySwimming = getSelectedInteger(mSpinnerSwimming.getSelectedItemPosition());
-                int todayGranma = getSelectedInteger(mSpinnerGranma.getSelectedItemPosition());
                 int todayFrench = getSelectedInteger(mSpinnerFrench.getSelectedItemPosition());
+
+                // Store student's name, reading from the editable field
+                String todayStudent = String.valueOf(mStudent.getText());
 
                 // Update database
                 SQLiteDatabase db = mDbHelper.getWritableDatabase();
@@ -146,18 +153,26 @@ public class MainActivity extends AppCompatActivity {
                 values.put(HabitEntry.COLUMN_DAY, mCurrentWeekday);
                 values.put(HabitEntry.COLUMN_JOGGING_TIME, todayJogging);
                 values.put(HabitEntry.COLUMN_SWIMMING_TIME, todaySwimming);
-                values.put(HabitEntry.COLUMN_GRANMA_TIME, todayGranma);
+                values.put(HabitEntry.COLUMN_TUTORING, todayStudent);
                 values.put(HabitEntry.COLUMN_FRENCH_TIME, todayFrench);
                 db.insert(HabitEntry.TABLE_NAME, null, values);
 
                 // Update summary table with the newly entered data
-                displaySummary();
+                addToSummary(mCurrentWeekday, todayJogging, todaySwimming, todayStudent, todayFrench);
 
                 // Make it impossible for the user to hit "CONFIRM" more than once
                 mButtonOk.setEnabled(false);
 
                 // Enable the "NEXT DAY" button
                 mButtonNextDay.setEnabled(true);
+
+                // Disable the spinners, since data is no longer editable
+                mSpinnerJogging.setEnabled(false);
+                mSpinnerSwimming.setEnabled(false);
+                mSpinnerFrench.setEnabled(false);
+                // Disable edittext
+                mStudent.setEnabled(false);
+
             }
         });
     }
@@ -277,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
         // Build up the table retrieving data from database
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         String[] columns = {HabitEntry.COLUMN_DAY, HabitEntry.COLUMN_JOGGING_TIME,
-                HabitEntry.COLUMN_SWIMMING_TIME, HabitEntry.COLUMN_GRANMA_TIME,
+                HabitEntry.COLUMN_SWIMMING_TIME, HabitEntry.COLUMN_TUTORING,
                 HabitEntry.COLUMN_FRENCH_TIME};
         // We are only interested in displaying the current week
         String selection = HabitEntry.COLUMN_WEEK + " =? ";
@@ -285,10 +300,7 @@ public class MainActivity extends AppCompatActivity {
         Cursor cursor = db.query(HabitEntry.TABLE_NAME, columns, selection, selectionArgs, null,
                 null, null);
         try {
-
             if (cursor.getCount() > 0) {
-                // If there is at least one row, make the table visible
-                mSummaryTable.setVisibility(View.VISIBLE);
 
                 // Loop on all the table entries, from Monday till today
                 cursor.moveToFirst();
@@ -297,7 +309,9 @@ public class MainActivity extends AppCompatActivity {
                     // First, inflate the row layout from a resource file
                     LinearLayout new_entry = (LinearLayout)
                             LayoutInflater.from(this).inflate(R.layout.table_entries,
-                                    mSummaryTable, true);
+                                    mSummaryTable, false);
+
+                    mSummaryTable.addView(new_entry);
 
                     // Now, fill the row
                     // Zeroth column: the day of the week
@@ -320,10 +334,9 @@ public class MainActivity extends AppCompatActivity {
                     ((TextView) new_entry.findViewById(R.id.column_swimming)).setText
                             (String.valueOf(hours_swimming * 0.5));
                     // Third column
-                    int hours_granma = cursor.getInt(cursor.getColumnIndex
-                            (HabitEntry.COLUMN_GRANMA_TIME));
-                    ((TextView) new_entry.findViewById(R.id.column_granma)).setText
-                            (String.valueOf(hours_granma * 0.5));
+                    String student = cursor.getString(cursor.getColumnIndex
+                            (HabitEntry.COLUMN_TUTORING));
+                    ((TextView) new_entry.findViewById(R.id.column_tutoring)).setText(student);
                     // Fourth column
                     int hours_french = cursor.getInt(cursor.getColumnIndex
                             (HabitEntry.COLUMN_FRENCH_TIME));
@@ -332,14 +345,41 @@ public class MainActivity extends AppCompatActivity {
 
                     cursor.moveToNext();
                 }
-
-            } else {
-                // Table remains empty, so hide it
-                mSummaryTable.setVisibility(View.GONE);
             }
 
         } finally {
             cursor.close();
         }
+    }
+
+    // Helper method to add the newly entered data to the summary table
+    private void addToSummary(int value1, int value2, int value3, String value4, int value5) {
+
+        // First, inflate the row layout from a resource file
+        LinearLayout new_entry = (LinearLayout)
+                LayoutInflater.from(this).inflate(R.layout.table_entries,
+                        mSummaryTable, false);
+
+        mSummaryTable.addView(new_entry);
+
+        // Now, fill the row
+        // Zeroth column: the day of the week
+        ((TextView) new_entry.findViewById(R.id.weekday)).setText(getWeekday(value1, 1));
+
+        // First, second and fourth columns:
+        // the number of hours spent doing each activity.
+        // Remember that HALF_HOUR = 1
+
+        // First column
+        ((TextView) new_entry.findViewById(R.id.column_jogging)).setText
+                (String.valueOf(value2 * 0.5));
+        // Second column
+        ((TextView) new_entry.findViewById(R.id.column_swimming)).setText
+                (String.valueOf(value3 * 0.5));
+        // Third column
+        ((TextView) new_entry.findViewById(R.id.column_tutoring)).setText(value4);
+        // Fourth column
+        ((TextView) new_entry.findViewById(R.id.column_french)).setText
+                (String.valueOf(value5 * 0.5));
     }
 }

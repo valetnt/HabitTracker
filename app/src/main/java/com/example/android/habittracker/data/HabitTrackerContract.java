@@ -16,7 +16,7 @@ public class HabitTrackerContract {
         public static final String COLUMN_DAY = "weekday";
         public static final String COLUMN_JOGGING_TIME = "jogging";
         public static final String COLUMN_SWIMMING_TIME = "swimming";
-        public static final String COLUMN_GRANMA_TIME = "granma";
+        public static final String COLUMN_TUTORING = "tutoring";
         public static final String COLUMN_FRENCH_TIME = "french";
 
         // Other constants
