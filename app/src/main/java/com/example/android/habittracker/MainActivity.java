@@ -99,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
         mButtonNextDay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 // Reset the spinners
                 mSpinnerJogging.setEnabled(true);
                 mSpinnerSwimming.setEnabled(true);
@@ -107,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                 mSpinnerJogging.setSelection(0);
                 mSpinnerSwimming.setSelection(0);
                 mSpinnerFrench.setSelection(0);
-                // Reset edittext
+                // Reset EditText
                 mStudent.setEnabled(true);
                 mStudent.setText("");
 
@@ -136,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
         mButtonOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 // Store the number of hours spent doing each activity for the current day
                 // into an integer variable, reading from the spinner selected item
                 int todayJogging = getSelectedInteger(mSpinnerJogging.getSelectedItemPosition());
@@ -147,15 +145,8 @@ public class MainActivity extends AppCompatActivity {
                 String todayStudent = String.valueOf(mStudent.getText());
 
                 // Update database
-                SQLiteDatabase db = mDbHelper.getWritableDatabase();
-                ContentValues values = new ContentValues();
-                values.put(HabitEntry.COLUMN_WEEK, mCurrentWeek);
-                values.put(HabitEntry.COLUMN_DAY, mCurrentWeekday);
-                values.put(HabitEntry.COLUMN_JOGGING_TIME, todayJogging);
-                values.put(HabitEntry.COLUMN_SWIMMING_TIME, todaySwimming);
-                values.put(HabitEntry.COLUMN_TUTORING, todayStudent);
-                values.put(HabitEntry.COLUMN_FRENCH_TIME, todayFrench);
-                db.insert(HabitEntry.TABLE_NAME, null, values);
+                updateDatabase(HabitEntry.TABLE_NAME, todayJogging, todaySwimming, todayStudent,
+                        todayFrench);
 
                 // Update summary table with the newly entered data
                 addToSummary(mCurrentWeekday, todayJogging, todaySwimming, todayStudent, todayFrench);
@@ -170,22 +161,69 @@ public class MainActivity extends AppCompatActivity {
                 mSpinnerJogging.setEnabled(false);
                 mSpinnerSwimming.setEnabled(false);
                 mSpinnerFrench.setEnabled(false);
-                // Disable edittext
+                // Disable EditText
                 mStudent.setEnabled(false);
-
             }
         });
     }
 
-    // Helper method that updates day (and possibly week).
-    // It is invoked every time the activity is recreated, AND
-    // when the button "NEXT DAY" is clicked.
-    private void updateWeekDay() {
+    /**
+     * Method that inserts a new entry into the the specified table.
+     * The entry is inserted with the current week and weekday values.
+     *
+     * @param table:  (string) name of the table that has to be updated
+     * @param value1: (integer) content of column {@link HabitEntry#COLUMN_JOGGING_TIME}
+     * @param value2: (integer) content of column {@link HabitEntry#COLUMN_SWIMMING_TIME}
+     * @param value3: (string) content of column {@link HabitEntry#COLUMN_TUTORING}
+     * @param value4: (integer) content of column {@link HabitEntry#COLUMN_FRENCH_TIME}
+     */
+    private void updateDatabase(String table, int value1, int value2, String value3, int value4) {
+
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(HabitEntry.COLUMN_WEEK, mCurrentWeek);
+        values.put(HabitEntry.COLUMN_DAY, mCurrentWeekday);
+        values.put(HabitEntry.COLUMN_JOGGING_TIME, value1);
+        values.put(HabitEntry.COLUMN_SWIMMING_TIME, value2);
+        values.put(HabitEntry.COLUMN_TUTORING, value3);
+        values.put(HabitEntry.COLUMN_FRENCH_TIME, value4);
+        db.insert(table, null, values);
+    }
+
+    /**
+     * Method that performs a database query, returning results in the default sort order.
+     * It queries the database using the following SQL statement:
+     * <p>
+     * "SELECT column0, column1, ...
+     * FROM table
+     * WHERE (key0, key1, ...) = (selectionArgs[0], selectionArgs[1], ...);"
+     *
+     * @param table:         the table name to compile the query against
+     * @param columns:       a list of which columns to return
+     * @param selection:     a filter declaring which rows to return, formatted as an SQL WHERE clause
+     *                       like the one above (but excluding the "WHERE" itself).
+     *                       Passing null will return all rows for the given table.
+     * @param selectionArgs: the array of values - expressed as strings - to be assigned to the
+     *                       keys in {@param selection}, as in the SQL WHERE clause above,
+     *                       or null if {@param selection} is null.
+     * @return a {@link Cursor} object, which is positioned before the first entry.
+     */
+    private Cursor getCursor(String table, String[] columns, String selection,
+                             String[] selectionArgs) {
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        return db.query(table, columns, selection, selectionArgs, null, null, null);
+    }
+
+    /**
+     * Helper method that updates mCurrentWeekday (and possibly mCurrentWeek).
+     * It is invoked every time the activity is recreated, or when the button "NEXT DAY" is clicked.
+     */
+    private void updateWeekDay() {
+
+        // Query database to retrieve day and week of the last entry
         String[] columns = {HabitEntry.COLUMN_WEEK, HabitEntry.COLUMN_DAY};
-        Cursor cursor = db.query(HabitEntry.TABLE_NAME, columns, null, null, null, null,
-                null);
+        Cursor cursor = getCursor(HabitEntry.TABLE_NAME, columns, null, null);
         try {
 
             if (cursor.getCount() == 0) {
@@ -198,8 +236,8 @@ public class MainActivity extends AppCompatActivity {
                 // If it is not the first time we use the app, then check
                 // when it was the last time it's been used and increment day by 1.
                 // For the moment, we are under the simplified assumption that the app
-                // is used EVERY DAY. No calendars have been used, in order to keep things
-                // as simple as possible.
+                // is used EVERY DAY AND ONLY ONCE PER DAY. No calendars have been used,
+                // in order to keep things as simple as possible.
                 cursor.moveToLast();
                 int weekLastUsed = cursor.getInt(cursor.getColumnIndex(HabitEntry.COLUMN_WEEK));
                 int dayLastUsed = cursor.getInt(cursor.getColumnIndex(HabitEntry.COLUMN_DAY));
@@ -290,15 +328,13 @@ public class MainActivity extends AppCompatActivity {
     private void displaySummary() {
 
         // Build up the table retrieving data from database
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
         String[] columns = {HabitEntry.COLUMN_DAY, HabitEntry.COLUMN_JOGGING_TIME,
                 HabitEntry.COLUMN_SWIMMING_TIME, HabitEntry.COLUMN_TUTORING,
                 HabitEntry.COLUMN_FRENCH_TIME};
         // We are only interested in displaying the current week
         String selection = HabitEntry.COLUMN_WEEK + " =? ";
         String selectionArgs[] = {String.valueOf(mCurrentWeek)};
-        Cursor cursor = db.query(HabitEntry.TABLE_NAME, columns, selection, selectionArgs, null,
-                null, null);
+        Cursor cursor = getCursor(HabitEntry.TABLE_NAME, columns, selection, selectionArgs);
         try {
             if (cursor.getCount() > 0) {
 
@@ -318,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
                     int weekday = cursor.getInt(cursor.getColumnIndex(HabitEntry.COLUMN_DAY));
                     ((TextView) new_entry.findViewById(R.id.weekday)).setText(getWeekday(weekday, 1));
 
-                    // First, second, third and fourth columns:
+                    // First, second and fourth columns:
                     // the number of hours spent doing each activity.
                     // Retrieve this number parsing the cursor, then turn it into a string.
                     // Remember that HALF_HOUR = 1
@@ -333,7 +369,7 @@ public class MainActivity extends AppCompatActivity {
                             (HabitEntry.COLUMN_SWIMMING_TIME));
                     ((TextView) new_entry.findViewById(R.id.column_swimming)).setText
                             (String.valueOf(hours_swimming * 0.5));
-                    // Third column
+                    // Third column: tutored student's name
                     String student = cursor.getString(cursor.getColumnIndex
                             (HabitEntry.COLUMN_TUTORING));
                     ((TextView) new_entry.findViewById(R.id.column_tutoring)).setText(student);
@@ -376,7 +412,7 @@ public class MainActivity extends AppCompatActivity {
         // Second column
         ((TextView) new_entry.findViewById(R.id.column_swimming)).setText
                 (String.valueOf(value3 * 0.5));
-        // Third column
+        // Third column: tutored student's name
         ((TextView) new_entry.findViewById(R.id.column_tutoring)).setText(value4);
         // Fourth column
         ((TextView) new_entry.findViewById(R.id.column_french)).setText
